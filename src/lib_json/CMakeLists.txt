@@ -9,6 +9,23 @@ if( CMAKE_COMPILER_IS_GNUCXX )
   endif()
 endif( CMAKE_COMPILER_IS_GNUCXX )
 
+include(CheckIncludeFileCXX)
+include(CheckTypeSize)
+include(CheckStructHasMember)
+include(CheckCXXSymbolExists)
+
+check_include_file_cxx(clocale HAVE_CLOCALE)
+set(CMAKE_EXTRA_INCLUDE_FILES clocale)
+check_type_size(lconv LCONV_SIZE LANGUAGE CXX)
+set(CMAKE_EXTRA_INCLUDE_FILES "")
+check_struct_has_member(lconv decimal_point clocale HAVE_DECIMAL_POINT LANGUAGE CXX)
+check_cxx_symbol_exists(localeconv clocale HAVE_LOCALECONV)
+
+if(NOT (HAVE_CLOCALE AND HAVE_LCONV_SIZE AND HAVE_DECIMAL_POINT AND HAVE_LOCALECONV))
+	message(WARNING "Locale functionality is not supported")
+	add_definitions(-DNO_LOCALE_SUPPORT)
+endif()
+
 SET( JSONCPP_INCLUDE_DIR ../../include )
 
 SET( PUBLIC_HEADERS
